@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'Py Spotty api'
+
+Parameters:
+  DEBUG:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+  SpotifyClientId:
+    Type: String
+    Default: '{{resolve:ssm:JafSpotifyClientId:1}}'
+    AllowedValues:
+      - '{{resolve:ssm:JafSpotifyClientId:1}}'
+  SpotifyClientSecret:
+    Type: String
+    Default: '{{resolve:ssm:JafSpotifySecret:1}}'
+    AllowedValues:
+      - '{{resolve:ssm:JafSpotifySecret:1}}'
+
+Globals:
+  Function:
+    Timeout: 15
+    MemorySize: 128
+    Runtime: python3.9
+    Environment:
+      Variables:
+        DEBUG: !Ref DEBUG
+        SpotifyClientId: !Ref SpotifyClientId
+        SpotifyClientSecret: !Ref SpotifyClientSecret
+
+Resources:
+  HttpApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: v1
+
+  QuizFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: functions/quiz.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: SpotifyProfile
+        - DynamoDBCrudPolicy:
+            TableName: SpotifyQuiz
+      Events:
+        PostQuiz:
+          Type: Api
+          Properties:
+            Path: /quiz
+            Method: get
+            RestApiId: !Ref HttpApiGateway
+        OptionsQuiz:
+          Type: Api
+          Properties:
+            Path: /quiz
+            Method: options
+            RestApiId: !Ref HttpApiGateway
+
+Outputs:
+  QuizFunction:
+    Description: Python quiz function
+    Value: !Ref QuizFunction
+  HttpApiGateway:
+    Description: Py Api Gateway
+    Value: !Ref HttpApiGateway

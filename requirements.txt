@@ -1,0 +1,3 @@
+aws_lambda_typing
+boto3_type_annotations
+requests

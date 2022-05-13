@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "jaf-quiz-py"
+s3_bucket = "jvb-code"
+s3_prefix = "SAM/jaf-quiz-py"
+region = "ap-southeast-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+# parameter_overrides = ""
+image_repositories = []
