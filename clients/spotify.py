@@ -51,8 +51,7 @@ class SpotifyClient:
       'offset': offset,
       'time_range': range,
     }, headers= {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': f'Basic {self.basic_auth}',
+      'Authorization': f'Bearer {token["access_token"]}',
     })
     r.raise_for_status()
     return r.json()

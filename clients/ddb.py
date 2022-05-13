@@ -23,14 +23,14 @@ class DdbClient():
         ExclusiveStartKey=r['LastEvaluatedKey'],
       )
       items.extend(r['Items'])
-    return [self.to_document(i) for i in items]
+    return [self.to_object(i) for i in items]
 
   def scan_quizzes(self, quizType: str) -> list[Quiz]:
     r = self.client.scan(
       TableName='SpotifyProfile',
-      FilterExpression='n_quizType=v_quizType',
-      ExpressionAttributeNames={ 'n_quizType': 'quizType' },
-      ExpressionAttributeValues={ 'v_quizType': { 'S': quizType } },
+      FilterExpression='#quizType = :quizType',
+      ExpressionAttributeNames={ '#quizType': 'quizType' },
+      ExpressionAttributeValues={ ':quizType': { 'S': quizType } },
     )
     items: list[dict] = r['Items']
     while r.get('LastEvaluatedKey'):
@@ -42,7 +42,7 @@ class DdbClient():
         ExpressionAttributeValues={ 'v_quizType': { 'S': quizType } },
       )
       items.extend(r['Items'])
-    return [self.to_document(i) for i in items]
+    return [self.to_object(i) for i in items]
 
   def put_quiz(self, quiz: Quiz):
     self.client.put_item(

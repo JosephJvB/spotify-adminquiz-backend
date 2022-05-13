@@ -3,10 +3,9 @@ import json
 import traceback
 from aws_lambda_typing import context as context_, events, responses
 from clients.ddb import DdbClient
-from clients.helpers import run_io_tasks_in_parallel
 from clients.spotify import SpotifyClient
 from models.http import HttpFailure, HttpSuccess
-from models.track_quiz import TrackQuiz
+from services.track_quiz import TrackQuizService
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,17 +18,19 @@ def handler(event: events.APIGatewayProxyEventV1, context: context_.Context)-> r
     if event['httpMethod'] == 'OPTIONS':
       return HttpSuccess()
 
-    # generate different quiz types...
     quiz_type = event['queryStringParameters'].get('type')
-    docs = run_io_tasks_in_parallel([
-      lambda: ddb.scan_profiles(),
-      lambda: ddb.scan_quizzes(quiz_type),
-    ])
-    q = {
-      'track': TrackQuiz
-    }[quiz_type](*docs)
+    service = {
+      'track': TrackQuizService
+    }.get(quiz_type)
+    if service is None:
+      m = f'Invalid request, failed to get service of type [{quiz_type}]'
+      logger.warn(m)
+      return HttpFailure(400, m)
 
-    ddb.put_quiz(q)
+    service = service(ddb, spotify)
+    service.load_data()
+    service.generate_quiz()
+    ddb.put_quiz(service.to_ddb)
 
     return HttpSuccess(json.dumps({
       'message': 'generate quiz success',
