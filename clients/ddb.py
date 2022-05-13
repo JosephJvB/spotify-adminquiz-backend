@@ -15,35 +15,34 @@ class DdbClient():
     self.ts = TypeSerializer()
   
   def scan_profiles(self) -> list[Profile]:
-    profiles: list[Profile] = []
-    last_key = None
-    while True:
+    r = self.client.scan(TableName='SpotifyProfile')
+    items: list[dict] = r['Items']
+    while r.get('LastEvaluatedKey'):
       r = self.client.scan(
         TableName='SpotifyProfile',
-        ExclusiveStartKey=last_key,
+        ExclusiveStartKey=r['LastEvaluatedKey'],
       )
-      for i in r['Items']:
-        profiles.append(self.to_document(i))
-      last_key = r['LastEvaluatedKey']
-      if last_key is None:
-        return profiles
+      items.extend(r['Items'])
+    return [self.to_document(i) for i in items]
 
   def scan_quizzes(self, quizType: str) -> list[Quiz]:
-    quizzes: list[Quiz] = []
-    last_key = None
-    while True:
+    r = self.client.scan(
+      TableName='SpotifyProfile',
+      FilterExpression='n_quizType=v_quizType',
+      ExpressionAttributeNames={ 'n_quizType': 'quizType' },
+      ExpressionAttributeValues={ 'v_quizType': { 'S': quizType } },
+    )
+    items: list[dict] = r['Items']
+    while r.get('LastEvaluatedKey'):
       r = self.client.scan(
         TableName='SpotifyProfile',
-        ExclusiveStartKey=last_key,
+        ExclusiveStartKey=r['LastEvaluatedKey'],
         FilterExpression='n_quizType=v_quizType',
         ExpressionAttributeNames={ 'n_quizType': 'quizType' },
         ExpressionAttributeValues={ 'v_quizType': { 'S': quizType } },
       )
-      for i in r['Items']:
-        quizzes.append(self.to_document(i))
-      last_key = r['LastEvaluatedKey']
-      if last_key is None:
-        return quizzes
+      items.extend(r['Items'])
+    return [self.to_document(i) for i in items]
 
   def put_quiz(self, quiz: Quiz):
     self.client.put_item(
