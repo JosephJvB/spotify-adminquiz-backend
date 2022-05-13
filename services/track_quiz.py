@@ -1,4 +1,3 @@
-import logging
 import json
 from random import randint, shuffle
 from models.profile import LoadedProfile
@@ -56,9 +55,13 @@ class TrackQuizService():
       self.num_choices = len(self.profiles)
 
   def generate_quiz(self):
+    i = 0
     while len(self.questions.keys()) < self.num_questions:
+      i += 1
       for p in self.profiles:
         self.add_question(p)
+      if i == 100:
+        break
 
   def add_question(self, profile: LoadedProfile):
     ans: TrackAnswer = {
@@ -73,8 +76,9 @@ class TrackQuizService():
         track = t
     if track is None:
       opts = [t for t in profile['tracks'] if not self.questions.get(t['id'])]
-      if len(opts) > 0:
-        track = opts[randint(0, len(opts) - 1)]
+      track = opts[randint(0, len(opts) - 1)]
+    if track is None:
+      return
   
     choices: dict[str, TrackAnswer] = {}
     choices[profile['spotifyId']] = ans
@@ -88,7 +92,7 @@ class TrackQuizService():
         choices[choice['spotifyId']]['spotifyId'] = choice['spotifyId']
         choices[choice['spotifyId']]['spotifyDisplayName'] = choice.get('displayName')
         choices[choice['spotifyId']]['spotifyDisplayPicture'] = choice.get('displayPicture')
-      if i == 50: # while loops scare me a bit
+      if i == 10: # while loops scare me a bit
         break
 
     next_question: TrackQuestion = {}
@@ -102,15 +106,8 @@ class TrackQuizService():
 
   @property
   def to_ddb(self) -> Quiz:
-    logger = logging.getLogger()
-    logger.info('huh')
-    logger.info(self.questions)
     questions = list(self.questions.values())
-    logger.info(questions)
-    logger.info(len(questions))
     shuffle(questions)
-    logger.info(questions)
-    logger.info(len(questions))
     return {
       'quizId': self.id,
       'quizType': 'track',
