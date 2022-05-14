@@ -51,15 +51,21 @@ Resources:
         PostCreateQuiz:
           Type: Api
           Properties:
-            Path: /quiz
+            Path: /quiz/{type}
             Method: post
             RestApiId: !Ref HttpApiGateway
+            RequestParameters:
+              - method.request.path:
+                  Required: true
         OptionsCreateQuiz:
           Type: Api
           Properties:
-            Path: /quiz
+            Path: /quiz/{type}
             Method: options
             RestApiId: !Ref HttpApiGateway
+            RequestParameters:
+              - method.request.path:
+                  Required: true
 
 Outputs:
   CreateQuizFunction:

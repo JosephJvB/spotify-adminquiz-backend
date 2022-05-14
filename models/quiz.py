@@ -1,4 +1,4 @@
-from typing import Callable, TypedDict
+from typing import TypedDict
 from models.spotify import SpotifyTrack
 
 # base quiz data

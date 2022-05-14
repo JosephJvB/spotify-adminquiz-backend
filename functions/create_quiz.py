@@ -15,20 +15,15 @@ spotify = SpotifyClient()
 def handler(event: events.APIGatewayProxyEventV1, context: context_.Context)-> responses.APIGatewayProxyResponseV1:
   try:
     logger.info('method ' + event['httpMethod'])
-
-    # todo protect endpoint
-    # token = (event['headers'].get('Authorization') or '').replace('Bearer', '')
-    # if token != 
-
     if event['httpMethod'] == 'OPTIONS':
       return HttpSuccess()
 
-    if event.get('queryStringParameters') is None:
-      m = 'Invalid request, missing queryStringParameters'
+    if event.get('pathParameters') is None:
+      m = 'Invalid request, missing pathParameters'
       logger.warn(m)
       return HttpFailure(400, m)
 
-    quiz_type = event['queryStringParameters'].get('type')
+    quiz_type = event['pathParameters'].get('type')
     service = {
       'track': TrackQuizService,
     }.get(quiz_type)
