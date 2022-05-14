@@ -1,7 +1,7 @@
 from typing import TypedDict
-from models.spotify import SpotifyArtist, SpotifyTrack
+from models.spotify import SpotifyArtist, SpotifyToken, SpotifyTrack
 
-class Profile(TypedDict):
+class ProfileDoc(TypedDict):
   spotifyId: str
   tokenJson: str
   displayName: str
@@ -10,9 +10,16 @@ class Profile(TypedDict):
   ipAddress: str
   lastLogin: int
 
-class LoadedProfile(Profile):
+class QuizDoc(TypedDict):
+  quizId: str
+  quizType: str
+  questions: str
+  responses: str
+  guid: str
+
+class LoadedProfile(ProfileDoc):
   spotifyId: str
-  tokenJson: str
+  tokenJson: SpotifyToken
   displayName: str
   displayPicture: str
   userAgent: str

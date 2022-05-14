@@ -37,24 +37,24 @@ Resources:
     Properties:
       StageName: v1
 
-  QuizFunction:
+  CreateQuizFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: functions/quiz.handler
+      Handler: functions/create_quiz.handler
       Policies:
         - DynamoDBCrudPolicy:
             TableName: SpotifyProfile
         - DynamoDBCrudPolicy:
             TableName: SpotifyQuiz
       Events:
-        PostQuiz:
+        PostCreateQuiz:
           Type: Api
           Properties:
             Path: /quiz
-            Method: get
+            Method: post
             RestApiId: !Ref HttpApiGateway
-        OptionsQuiz:
+        OptionsCreateQuiz:
           Type: Api
           Properties:
             Path: /quiz
@@ -62,9 +62,9 @@ Resources:
             RestApiId: !Ref HttpApiGateway
 
 Outputs:
-  QuizFunction:
+  CreateQuizFunction:
     Description: Python quiz function
-    Value: !Ref QuizFunction
+    Value: !Ref CreateQuizFunction
   HttpApiGateway:
     Description: Py Api Gateway
     Value: !Ref HttpApiGateway

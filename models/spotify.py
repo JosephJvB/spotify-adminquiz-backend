@@ -48,6 +48,7 @@ class SpotifyAlbum(TypedDict):
   images: list[SpotifyImage]
   name: str
   release_date: str
+  available_markets: list[str]
 
 class Followers(TypedDict):
   href: str

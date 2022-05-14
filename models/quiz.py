@@ -1,8 +1,11 @@
-from models.profile import Profile
-from typing import TypedDict
-from models.spotify import SpotifyArtistTrim, SpotifyTrack
+from typing import Callable, TypedDict
+from models.spotify import SpotifyTrack
 
 # base quiz data
+class ProfileAnswer(TypedDict):
+  spotifyId: str
+  spotifyDisplayName: str
+  spotifyDisplayPicture: str
 class Question(TypedDict):
   id: str
   subject: dict[str, str]
@@ -12,35 +15,31 @@ class QuizResponse(TypedDict):
   spotifyId: str
   answers: list[Question]
   score: int
-class Quiz(TypedDict):
-  id: str
-  ts: int
+class BaseQuiz(TypedDict):
+  guid: str
+  quizId: str
+  quizType: str
   type: str
   questions: list[Question]
   responses: list[QuizResponse]
 
 # track quiz data
-class TrackAnswer(TypedDict):
-  spotifyId: str
-  spotifyDisplayName: str
-  spotifyDisplayPicture: str
 class TrackQuestion(Question):
   subject: SpotifyTrack
-  answer: TrackAnswer
-  choices: list[TrackAnswer]
+  answer: ProfileAnswer
+  choices: list[ProfileAnswer]
 class TrackQuizResponse(QuizResponse):
   answers: list[TrackQuestion]
-class TrackQuiz(Quiz):
-  id: str
-  ts: int
+class TrackQuiz(BaseQuiz):
   questions: list[TrackQuestion]
-  responses: list[QuizResponse]
 
 
 # wip festy quiz
-class Festy(TypedDict):
-  friday: list[SpotifyArtistTrim]
-  saturday: list[SpotifyArtistTrim]
-  sunday: list[SpotifyArtistTrim]
+class FestySubject(TypedDict):
+  poster_url: str
 class FestyQuestion(Question):
-  subject: Festy
+  subject: FestySubject
+  answer: ProfileAnswer
+  choices: list[ProfileAnswer]
+class Festy(BaseQuiz):
+  questions: list[FestyQuestion]

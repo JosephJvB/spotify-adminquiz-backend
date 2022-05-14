@@ -15,12 +15,22 @@ spotify = SpotifyClient()
 def handler(event: events.APIGatewayProxyEventV1, context: context_.Context)-> responses.APIGatewayProxyResponseV1:
   try:
     logger.info('method ' + event['httpMethod'])
+
+    # todo protect endpoint
+    # token = (event['headers'].get('Authorization') or '').replace('Bearer', '')
+    # if token != 
+
     if event['httpMethod'] == 'OPTIONS':
       return HttpSuccess()
 
+    if event.get('queryStringParameters') is None:
+      m = 'Invalid request, missing queryStringParameters'
+      logger.warn(m)
+      return HttpFailure(400, m)
+
     quiz_type = event['queryStringParameters'].get('type')
     service = {
-      'track': TrackQuizService
+      'track': TrackQuizService,
     }.get(quiz_type)
     if service is None:
       m = f'Invalid request, failed to get service of type [{quiz_type}]'
@@ -29,11 +39,11 @@ def handler(event: events.APIGatewayProxyEventV1, context: context_.Context)-> r
 
     service = service(ddb, spotify)
     service.load_data()
-    service.generate_quiz()
-    ddb.put_quiz(service.to_ddb)
+    service.generate_questions()
+    service.save()
 
     return HttpSuccess(json.dumps({
-      'message': 'generate quiz success',
+      'message': f'generate [{quiz_type}] quiz success',
     }))
 
   except Exception:

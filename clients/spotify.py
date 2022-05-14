@@ -35,6 +35,10 @@ class SpotifyClient:
     return r['items']
   def load_tracks(self, token: SpotifyToken, range: str, limit: int, offset: int = 0) -> list[SpotifyTrack]:
     r: SpotifyTopItemsResponse = self.load_top_items(token, 'tracks', limit, range, offset)
+    items: list[SpotifyTrack] = r['items']
+    for i in items: # avoid loading cluttered json
+      del i['available_markets']
+      del i['album']['available_markets']
     return r['items']
 
   def load_top_items(

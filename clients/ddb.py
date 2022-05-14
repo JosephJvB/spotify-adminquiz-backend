@@ -2,8 +2,7 @@ import boto3
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 from boto3_type_annotations.dynamodb import Client
 
-from models.profile import Profile
-from models.quiz import Quiz
+from models.documents import ProfileDoc, QuizDoc
 
 class DdbClient():
   client: Client
@@ -14,7 +13,7 @@ class DdbClient():
     self.td = TypeDeserializer()
     self.ts = TypeSerializer()
   
-  def scan_profiles(self) -> list[Profile]:
+  def scan_profiles(self) -> list[ProfileDoc]:
     r = self.client.scan(TableName='SpotifyProfile')
     items: list[dict] = r['Items']
     while r.get('LastEvaluatedKey'):
@@ -25,26 +24,26 @@ class DdbClient():
       items.extend(r['Items'])
     return [self.to_object(i) for i in items]
 
-  def scan_quizzes(self, quizType: str) -> list[Quiz]:
-    r = self.client.scan(
-      TableName='SpotifyProfile',
-      FilterExpression='#quizType = :quizType',
+  def query_quizzes(self, quizType: str) -> list[QuizDoc]:
+    r = self.client.query(
+      TableName='SpotifyQuiz',
+      KeyConditionExpression='#quizType = :quizType',
       ExpressionAttributeNames={ '#quizType': 'quizType' },
       ExpressionAttributeValues={ ':quizType': { 'S': quizType } },
     )
     items: list[dict] = r['Items']
     while r.get('LastEvaluatedKey'):
-      r = self.client.scan(
-        TableName='SpotifyProfile',
+      r = self.client.query(
+        TableName='SpotifyQuiz',
         ExclusiveStartKey=r['LastEvaluatedKey'],
-        FilterExpression='n_quizType=v_quizType',
+        KeyConditionExpression='n_quizType = v_quizType',
         ExpressionAttributeNames={ 'n_quizType': 'quizType' },
         ExpressionAttributeValues={ 'v_quizType': { 'S': quizType } },
       )
       items.extend(r['Items'])
     return [self.to_object(i) for i in items]
 
-  def put_quiz(self, quiz: Quiz):
+  def put_quiz(self, quiz: QuizDoc):
     self.client.put_item(
       TableName='SpotifyQuiz',
       Item=self.to_document(quiz)
