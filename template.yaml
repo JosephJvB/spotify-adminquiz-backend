@@ -55,7 +55,7 @@ Resources:
             Method: post
             RestApiId: !Ref HttpApiGateway
             RequestParameters:
-              - method.request.path:
+              - method.request.path.type:
                   Required: true
         OptionsCreateQuiz:
           Type: Api
@@ -64,7 +64,7 @@ Resources:
             Method: options
             RestApiId: !Ref HttpApiGateway
             RequestParameters:
-              - method.request.path:
+              - method.request.path.type:
                   Required: true
 
 Outputs:

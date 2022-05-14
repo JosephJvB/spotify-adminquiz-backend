@@ -14,7 +14,6 @@ class QuizDoc(TypedDict):
   quizId: str
   quizType: str
   questions: str
-  responses: str
   guid: str
 
 class LoadedProfile(ProfileDoc):

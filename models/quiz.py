@@ -21,7 +21,7 @@ class BaseQuiz(TypedDict):
   quizType: str
   type: str
   questions: list[Question]
-  responses: list[QuizResponse]
+  ts: str
 
 # track quiz data
 class TrackQuestion(Question):
