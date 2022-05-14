@@ -82,7 +82,7 @@ class TrackQuizService():
     next_quiz['guid'] =  str(uuid4())
     next_quiz['quizId'] = 'current'
     next_quiz['quizType']= 'track'
-    next_quiz['ts']= str(now_ts())
+    next_quiz['ts']= now_ts()
     next_quiz['questions']= json.dumps(questions)
     tasks.append(lambda: self.ddb.put_quiz(next_quiz))
     run_io_tasks_in_parallel(tasks)

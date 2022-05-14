@@ -15,6 +15,7 @@ class QuizDoc(TypedDict):
   quizType: str
   questions: str
   guid: str
+  ts: int
 
 class LoadedProfile(ProfileDoc):
   spotifyId: str
