@@ -37,6 +37,9 @@ class TrackQuiz(BaseQuiz):
 # wip festy quiz
 class FestySubject(TypedDict):
   poster_url: str
+  friday: list[str]
+  saturday: list[str]
+  sunday: list[str]
 class FestyQuestion(Question):
   subject: FestySubject
   answer: ProfileAnswer
