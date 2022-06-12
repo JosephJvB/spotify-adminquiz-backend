@@ -24,3 +24,6 @@ class HttpSuccess(HttpResponse):
 class HttpFailure(HttpResponse):
   def __init__(self, code: int = 500, body: str = ''):
       super().__init__(code, body)
+    
+class CreateQuizRequest(TypedDict):
+  userIds: list[str]

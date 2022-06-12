@@ -4,7 +4,7 @@ import traceback
 from aws_lambda_typing import context as context_, events, responses
 from clients.ddb import DdbClient
 from clients.spotify import SpotifyClient
-from models.http import HttpFailure, HttpSuccess
+from models.http import HttpFailure, HttpSuccess, CreateQuizRequest
 from services.track_quiz import TrackQuizService
 
 logger = logging.getLogger()
@@ -23,7 +23,20 @@ def handler(event: events.APIGatewayProxyEventV1, context: context_.Context)-> r
       logger.warn(m)
       return HttpFailure(400, m)
 
-    quiz_type = event['pathParameters'].get('type')
+    if event.get('body') is None:
+      m = 'Invalid request, missing body'
+      logger.warn(m)
+      return HttpFailure(400, m)
+
+    quiz_type: str = event['pathParameters'].get('type')
+    req: CreateQuizRequest = json.loads(event['body'])
+    user_ids = req.get('userIds')
+
+    if user_ids is None or len(user_ids) == 0:
+      m = 'Invalid request, no userIds in request'
+      logger.warn(m)
+      return HttpFailure(400, m)
+
     service = {
       'track': TrackQuizService,
     }.get(quiz_type)
@@ -33,7 +46,7 @@ def handler(event: events.APIGatewayProxyEventV1, context: context_.Context)-> r
       return HttpFailure(400, m)
 
     service = service(ddb, spotify)
-    service.load_data()
+    service.load_data(user_ids)
     service.generate_questions()
     service.save()
 

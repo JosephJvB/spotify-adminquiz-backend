@@ -13,16 +13,37 @@ class DdbClient():
     self.td = TypeDeserializer()
     self.ts = TypeSerializer()
   
-  def scan_profiles(self) -> list[ProfileDoc]:
-    r = self.client.scan(TableName='SpotifyProfile')
-    items: list[dict] = r['Items']
-    while r.get('LastEvaluatedKey'):
-      r = self.client.scan(
-        TableName='SpotifyProfile',
-        ExclusiveStartKey=r['LastEvaluatedKey'],
+  def get_profiles(self, user_ids: list[str]) -> list[ProfileDoc]:
+    profiles: list[ProfileDoc] = []
+    for i in range(0, len(user_ids), 100):
+      b = user_ids[i:i+100]
+      keys = []
+      for id in b:
+        keys.append({
+          'spotifyId': { 'S': id }
+        })
+      r = self.client.batch_get_item(
+        RequestItems={
+          'SpotifyProfile': {
+            'Keys': keys
+          }
+        }
       )
-      items.extend(r['Items'])
-    return [self.to_object(i) for i in items]
+      for item in r['Responses']['SpotifyProfile']:
+        p = self.to_object(item)
+        profiles.append(p)
+    return profiles
+
+  # def scan_profiles(self) -> list[ProfileDoc]:
+  #   r = self.client.scan(TableName='SpotifyProfile')
+  #   items: list[dict] = r['Items']
+  #   while r.get('LastEvaluatedKey'):
+  #     r = self.client.scan(
+  #       TableName='SpotifyProfile',
+  #       ExclusiveStartKey=r['LastEvaluatedKey'],
+  #     )
+  #     items.extend(r['Items'])
+  #   return [self.to_object(i) for i in items]
 
   def query_quizzes(self, quizType: str) -> list[QuizDoc]:
     r = self.client.query(

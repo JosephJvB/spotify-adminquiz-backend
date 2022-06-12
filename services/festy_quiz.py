@@ -36,9 +36,9 @@ class FestyQuizService():
     self.past_questions = {}
     self.last_quiz = None
 
-  def load_data(self):
+  def load_data(self, user_ids: list[str]):
     data = run_io_tasks_in_parallel([
-      lambda: self.ddb.scan_profiles(),
+      lambda: self.ddb.get_profiles(user_ids),
       lambda: self.ddb.query_quizzes('festy'),
     ])
 
